@@ -1,0 +1,92 @@
+---
+title: "annotated-bibliography"
+author: "Finn Fujimura"
+date: "October 31, 2025"
+output: pdf_document
+bibliography: references.bib
+csl: apa.csl
+---
+
+Citation: [@osborne1991bees]
+
+Summary: This article talks about agricultural intensification in Europe, specifically the loss of diverse habitats like hedgerows and grasslands, is reducing essential bee forage and nesting sites. The authors connect these land-use changes to ongoing bee population declines. They conclude this trend is creating an imminent shortage of pollinators that threatens both crops and wild plants.
+
+Evaluation: The paper's strength is its comprehensive synthesis linking big scale agricultural policy to bee ecology. Its  limitations are that the data is now outdated (1991) and, as a review, it relies on correlating trends rather than new evidence.
+
+Relevance: This article is foundational for my project, as it establishes the critical link between large-scale environmental change (habitat loss) and pollinator health. It helps own study, which will investigate a different environmental driver (temperature).
+
+Citation: [@abou2012tolerance]
+
+Summary: This study compares how two honey bee races, the Yemeni and Carniolan, handle heat and humidity. Researchers exposed caged bees to various temperatures and humidity levels, measuring survival time, heat tolerance, and water loss. They found that temperature had a bigger impact on survival than humidity. The Yemeni bees, adapted to harsh conditions, consistently tolerated higher heat and survived longer under stress than the Carniolan bees.
+
+Evaluation: The paper's strength is its clear, controlled experiment that directly compares the two bee races. The results are straightforward and easy to understand. Its main limitation is that these are lab experiments on small groups of caged bees, which might not perfectly predict how an entire, complex colony would respond in a natural setting.
+
+Relevance: This article is highly relevant to my first two research questions. It provides direct evidence that different types of bees have very different tolerances to extreme heat. This supports my hypothesis that some Oregon bee species will be more affected by high temperatures than others.
+
+Citation: [@abou2017review]
+
+Summary: This paper reviews how temperature and humidity affect honey bee activities. It covers everything from inside the colony, like brood rearing and thermoregulation, to outside activities like foraging and queen mating flights. The authors gather evidence from many different studies to show the optimal conditions for bees. They also highlight how extreme high or low temperatures negatively impact bee survival, development, and behavior.
+
+Evaluation: This paper's greatest strength is its broad scope, as it collects a large body of research into one useful document. As a review, it does not present new data. Its focus is also heavily on honey bees, which may not perfectly represent the diverse native bees in Oregon.
+
+Relevance: This review is incredibly useful for all three of my research questions. It provides a complete background on known temperature impacts, which directly informs my hypotheses about species numbers, heat effects on specific bees, and bee-plant interactions. It's the perfect starting point for understanding the established science.
+
+Citation: [@brovarskiy2020high]
+
+Summary: This paper analyzes how high temperatures in Uzbekistan and Ukraine affect both honey bees and the plants they feed on. The authors found that during extreme heat, plants either stop producing nectar or the nectar becomes too thick for bees to drink. In response, bees stop foraging, often from late morning until evening. Instead, they show stress behaviors like fanning, collecting water, and clustering on the outside of the hive to cool it down.
+
+Evaluation: The paper's main strength is connecting two key problems: the heat's effect on the plant's nectar and the bee's behavioral response. These are field observations, so they show what happens in a real world setting. The study is, however, focused only on honey bees, which may react differently than native bees.
+
+Relevance: This paper directly supports my third research question. It provides a clear mechanism for how high temperatures can reduce bee-plant interactions: the plants stop providing food, and the bees stop flying.
+
+Citation: [@jaboor2022effect]
+
+Summary: This study measured bee activity at strawberry farms in Australia, comparing the introduced honey bee to two native bee species. Researchers counted bees at different microclimate temperatures. They found that the honey bee was most abundant and active across the widest range of temperatures. The two native bee species had different and narrower thermal windows, with one preferring cooler temperatures and the other being active at warmer temperatures.
+
+Evaluation: This paper's strength is its direct comparison of native and introduced bees in a real world farm setting, using precise microclimate data. Its main weakness is the very small sample size for the Exoneura bee, which makes its results less certain.
+
+Relevance: This study is perfect for my first two research questions. It provides clear field data showing that temperature dictates bee activity and that different species are affected differently. This strongly supports my plan to investigate which Oregon bee species are most or least affected by extreme heat.
+
+Citation: [@corbet1993temperature]
+
+Summary: This paper explains why temperature is so critical for bee activity. It argues that each bee species has a specific temperature range, where it can fly. The authors propose a simple way to measure this using a "black globe thermometer," which mimics how a bee's body heats up in the sun. They found that different bee species have different thresholds, for example, some bumble bees can start flying at much cooler temperatures than honey bees.
+
+Evaluation: Its main strength is providing a simple, practical method for field ecologists to measure the real thermal conditions a bee experiences. It's a bit old, so the data is limited, and it focuses mostly on social bees (like honey bees and bumble bees) and their minimum temperature for flying.
+
+Relevance: This paper provides the key concept of "thermal windows," which directly explains why you'd expect different bee species to be affected differently by high and low temperatures. It also shows that temperature is the first hurdle: if it's too hot or cold, bees won't fly, which is the most basic way to reduce bee-plant interactions.
+
+Citation: [@descamps2018temperature]
+
+Summary: This study tested how heat and water stress affect borage plants. Researchers grew plants in chambers at different temperatures and watering levels. They found that stressed plants produced smaller flowers and significantly less nectar sugar. The stress also made most of the pollen nonviable. As a result of these poor rewards, the stressed plants received only half as many bumblebee visits as the healthy control plants.
+
+Evaluation: The strength of this paper is its controlled experiment, which clearly isolates the effects of heat. It successfully links plant stress to a  reduction in pollen/nectar, which then explains the change in bee behavior. Its main limitation is that it's a lab study on a single plant species, so the same effects might not be as strong in a realfield with many different plants.
+
+Relevance: This article is critical for my research question. It provides direct evidence that high temperatures damage the quality of nectar and pollen. This strongly supports my hypothesis that hot weeks reduce bee plant interactions, not just because the bees are too hot to fly, but because the flowers themselves stop providing a good food source.
+
+Citation: [@walters2022heat]
+
+Summary: This article argues that extreme heat events are a major threat to pollination. The authors explain that heat doesn't just directly harm bees, it also indirectly harms them by stressing the plants. Heat stressed plants produce less nectar and lowerquality pollen, which I read in the last article. Heat also causes "phenological mismatch" (where bees and flowers appear at different times) and forces bees to stop foraging to avoid overheating, all of which reduces pollination and, ultimately, crop yields.
+
+Evaluation: This is a very current and important paper. Its biggest strength is clearly connecting the direct effects of heat on bees with the indirect effects of heat on plants and their floral rewards. It's a review, so it mostly points out what we still need to learn, especially regarding wild bees.
+
+Relevance: This paper is the perfect summary for my entire project. It directly supports all three of my research questions by showing that extreme heat can 1) cause bee populations to drop, 2) affect some bee species more than others, and 3) reduce bee-plant interactions because the bees are stressed and the plants are no longer a good food source.
+
+Citation: [@roof2018associations]
+
+Summary: This study looked at bee and plant communities in a riverside ecosystem in Eastern Oregon. The researchers documented which bees visited which flowers to see what plants were most important. They found that some plants, like Potentilla gracilis were highly popular and supported a diverse range of bee species. The status of a plant and its color did not seem to affect which bees visited. However, flower shape was a key factor: larger, long tongued bees preferred complex, tubular flowers, while smaller, short tongued bees stuck to simple, open flowers.
+
+Evaluation: This paper's biggest strength is that it's a field study focused on native bee communities in Oregon, my exact area of interest. It provides a list of important bee-plant relationships. Its main limitation for my project is that its goal was not to study temperature, but rather to document the baseline bee-plant community and the effects of flower shape.
+
+Relevance: This paper is extremely relevant to my research question. It provides a "who's who" of the key bee genera in my study area and shows that they are already separated by flower preferences. This strongly supports my hypothesis that different species will be affected differently by heat, as they are already specialized for different resources. It also gives me a specific list of bee and plant species to look for.
+
+Citation: [@vickers2022climate]
+
+Summary: This study was conducted in montane meadows in Oregon's Cascade Range, investigates how climate variability affects bee-pant networks. Using degree days to measure heat, the author found that hotter years were significantly linked to lower flower abundance and shorter flowering seasons. While bee abundance itself was not directly related to heat, the timing of bee activity was. The study also found the network was flexible, with bees switching floral partners from year to year. However, the author concludes that hotter, drier summers will continue to shorten flower availability, which will likely harm bee populations, especially specialists that cannot easily switch.
+
+Evaluation: This is an incredibly valuable source, as it's a long-term field study in my exact geographic area. Its primary strength is using network analysis to connect real climate data to both plant and bee responses. Its main finding that flowers are more directly impacted by heat than the bees themselves is a key insight.
+
+Relevance: This thesis is great for my project. It provides a long baseline dataset and a clear methodology for linking climate data to bee activity in Oregon.
+
+---
+
+## References
