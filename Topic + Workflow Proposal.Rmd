@@ -1,29 +1,30 @@
----
-title: "Topic + Workflow Proposal"
-output: html_document
-date: "2025-11-06"
----
+# Title of project (system/region)
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+**Partner(s):** Name Surname
 
-## R Markdown
+## Literature review (~5 paragraphs)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### Paragraph 1 — Problem & significance (big‑picture reviews)
+…
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Paragraph 2–3 — Past work & data landscape (who/where/how; gaps)
+…
 
-```{r cars}
-summary(cars)
-```
+### Paragraph 4 — Purpose & why now
+…
 
-## Including Plots
+### Paragraph 5 — Hypotheses (directional) & brief rationale
+- H1: … (I predict … because …)
+- H2: …
 
-You can also embed plots, for example:
+## Dataset identification
+- Dataset A (URL/DOI): collector, methods, columns/units …
+- OBA → transformed to … (plan and rationale) …
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Workflow plan (prose)
+1) Cleaning & validation: …  
+2) Aggregations/derivations: …  
+3) Functions/loops (inputs → outputs): …  
+4) Statistical test + programmatic implementation: …  
+5) Planned visualizations/tables: …  
+6) Risks & mitigations: …
