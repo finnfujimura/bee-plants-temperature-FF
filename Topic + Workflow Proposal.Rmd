@@ -1,30 +1,49 @@
-# Title of project (system/region)
+# Title of project How temperature and climate events affect bee activity.
 
 **Partner(s):** Name Surname
 
 ## Literature review (~5 paragraphs)
 
 ### Paragraph 1 — Problem & significance (big‑picture reviews)
-…
+Pollinators are critical partners for maintaining healthy ecosystems and securing our food crops, but their populations are facing serious challenges. For a long time, the main threat was habitat loss, especially from agricultural practices that wiped out the diverse flowers and nesting sites bees need to survive (Osborne, Williams, & Corbet, 1991). Now, climate change is adding another major layer of stress. Extreme heat events are becoming a significant and immediate threat to pollinators. This threat works in two ways: high temperatures can directly harm the bees themselves, and they can also indirectly harm them by stressing the very plants they rely on for food (H. Abou-Shaara, Owayss, Ibrahim, & Basuny, 2017).
 
 ### Paragraph 2–3 — Past work & data landscape (who/where/how; gaps)
-…
+Researchers have long known that temperature is a master switch for bee activity. Every bee species has a specific "thermal window," or temperature range, where it can actually fly and get work done. Studies show that temperatures outside this optimal range, both too hot or too cold, hurt bee survival, growth, and behavior (Corbet et al., 1993). This tolerance, however, isn't one size fits all. Lab experiments, for example, have shown that heat-adapted bees, like the Yemeni honey bee, can survive high temperatures much better than other races like the Carniolan honey bee. This variation also appears in the field, where researchers in Australia found that native bee species had different and much narrower thermal windows for activity compared to the common introduced honey bee (H. F. Abou-Shaara, Al-Ghamdi, & Mohamed, 2012).
+A key piece of the puzzle involves what heat does to the bees' food source. Field studies in hot climates found that when temperatures spike, plants may stop making nectar, or the nectar can become too thick for bees to even drink (Brovarskiy, Turdaliev, & Mirzakhmedova, 2020). As a result, bees just stop foraging and instead focus on survival behaviors like fanning the hive or collecting water. This has been confirmed in controlled lab settings, where heat-stressed borage plants produced smaller flowers, less nectar sugar , and pollen that was mostly nonviable. Because the food reward was so poor, those stressed plants got only half as many bumblebee visits. While we know this happens, much of this research has focused on honey bees , leaving a gap in our understanding of how these pressures affect entire communities of diverse native bees.
 
 ### Paragraph 4 — Purpose & why now
-…
+
+The purpose of this study is to help fill that gap by connecting these established concepts to the diverse bee communities in Oregon. We can do this by combining the large-scale community science data from the Oregon Bee Atlas (OBA) with high-resolution climate data from PRISM and GRIDMET. Foundational work has already been done in the region. We have studies from Eastern Oregon that map out the baseline bee-plant networks and long-term studies from the Cascade Range that successfully linked hotter years to fewer flowers. This project will build on that work, using the new wealth of OBA data to test how recent, short-term heat events affect bee biodiversity and their interactions with plants across the entire state.
 
 ### Paragraph 5 — Hypotheses (directional) & brief rationale
-- H1: … (I predict … because …)
-- H2: …
+- H1: I predict that native and specialist bee species will be more negatively affected by extreme heat than generalist or introduced species. This is because field studies show native bees often have narrower thermal windows and specialists may be unable to switch food sources when their specific host plant is stressed by heat.
+- H2: I predict that heavy smoke and airborne ash from active forest fires will significantly reduce bee-plant interactions, even in nearby unburned areas. This is because the literature shows many bees rely heavily on scent to find flowers. I predict that smoke will block or alter these floral scents, making it much harder for bees to navigate and locate their food. This reduced foraging efficiency, combined with rritation or stress from the smoke, will likely cause bees to stop flying, similar to their behavioral shutdown during extreme heat.
+
 
 ## Dataset identification
-- Dataset A (URL/DOI): collector, methods, columns/units …
-- OBA → transformed to … (plan and rationale) …
+- PRISM data (https://prism.oregonstate.edu/): 
+collector: OSU PRISM Group 
+
+methods, columns/units: The PRISM Group gathers weather observations from a wide range of monitoring networks, applies sophisticated quality control measures and mapping methods, and develops spatial datasets to reveal short- and long-term weather patterns. The data contains lots of .tif data and .xml files for metadata.
 
 ## Workflow plan (prose)
-1) Cleaning & validation: …  
-2) Aggregations/derivations: …  
-3) Functions/loops (inputs → outputs): …  
-4) Statistical test + programmatic implementation: …  
-5) Planned visualizations/tables: …  
-6) Risks & mitigations: …
+1) Cleaning & validation: 
+
+My first step is to clean the Oregon Bee Atlas (OBA) data. I will start by filtering the dataset to include only records where the stateProvince is "Oregon". I will remove any records that have missing or highly uncertain eventDate, decimalLatitude, or decimalLongitude, as these are essential for joining with the climate data. For the hypotheses focused on species, I will filter the data to only include records identified to the species level (and are confirmed to be bees. I will also check for and remove any obvious data entry errors/ missing data
+
+2) Aggregations/derivations: 
+
+I want to aggregate the year month day time into one datetime column in order to lineup with my climate data.I would also like to create a species richness variable by aggregating entries. 
+3) Functions/loops (inputs → outputs): 
+
+I want to create a function that will take in the date, latitude and longitude from OBA data, and return the max temp and min temp for that area on the date in the PRISM data.
+4) Statistical test + programmatic implementation: 
+
+I plan to do some statistical significance testing, such as binomial/poisson distributions in order to reject or fail to reject my null hypotheses.
+5) Planned visualizations/tables: 
+
+I plan to create a scatterplot that shows the relationship between max temperature and species richness/interactions. I would also like a map of Oregon that is shaded by species richness in counties, and then a similar plot showing average temperatures.
+6) Risks & mitigations: 
+
+Since this is publicly collected data, there may be some sampling bias. Researchers may be more motivated to collect data when the weather is temperate, or collect data in areas that are accessible to them. Since this risk occurs during the data collection, I don’t believe there is a concrete way for me to mitigate this. 
+
