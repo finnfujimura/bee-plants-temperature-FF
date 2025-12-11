@@ -1,0 +1,500 @@
+---
+title: "Final Writeup"
+author: "Finn Fujimura"
+date: "December 10th, 2025"
+output: pdf_document
+bibliography: references.bib
+csl: apa.csl
+nocite: '@*'
+---
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(readr)
+library(janitor)
+```
+
+## Introduction
+
+Pollinators are essential for maintaining global biodiversity and food security. However, climate change is introducing a critical stressor to these systems: extreme heat. bees rely on environmental temperature to regulate their metabolism, operating within specific "thermal windows" where flight is efficient (Corbet et al.). When temperatures exceed a species' limit, they must cease foraging to avoid overheating.
+
+Crucially, thermal tolerance varies by species. Evidence suggests that introduced European Honey Bees may possess wider thermal windows than many native bees adapted to temperate climates (Abou-Shaara et al.). Additionally, rising temperatures increase Vapor Pressure Deficit (VPD), or the "drying power" of the air. High VPD accelerates water loss, posing a severe desiccation risk to native bees compared to robust introduced species.
+
+While honey bee responses to heat are well-documented (Brovarskiy), there is a significant gap in understanding how diverse native bee communities respond to these pressures in the field. This study bridges that gap by coupling high-resolution climate data with community science records from the Oregon Bee Atlas to answer two questions:
+
+Does extreme heat differentially impact foraging abundance? I predict native bee activity will decline sharply at high temperatures, while introduced species will remain resilient.
+
+Is foraging limited by air dryness (VPD)? I predict that high VPD will negatively correlate with activity, disproportionately affecting native species.
+
+## Data
+
+Data Sets Used:
+
+Oregon Bee Atlas (OBA): An open source dataset containing foraging records of bee species in Oregon.
+
+PRISM Climate Group Data: Daily meteorological time-series data obtained from the PRISM Climate Group (Oregon State University). Variables included daily Minimum Temperature (tmin), Mean Temperature (tmean), Maximum Temperature (tmax), Minimum Vapor Pressure Deficit (vpdmin), and Maximum Vapor Pressure Deficit (vpdmax).
+
+Data Skills Demonstrated:
+
+Data Aggregation & Summarization: Compiling multiple weather station files and calculating regional daily averages to prevent record duplication during joining.
+
+Relational Joining: Performing a left-join operation to merge biological occurrence data with meteorological time-series data based on a common Date key.
+
+Data Tidying & Cleaning: Standardizing column names, parsing date formats (mdy vs ymd), and filtering for the active summer season (May–September) to remove seasonal bias.
+
+```{r}
+df <- read.csv("data/OBA_2018-2024.csv")
+head(df)
+```
+
+
+```{r}
+bee_df <- df %>%
+  mutate(date_parsed = mdy(verbatimEventDate)) %>%
+  arrange(date_parsed)
+head(bee_df)
+```
+
+```{r}
+weather_files <- list.files(path = "data", pattern = "^PRISM.*\\.csv$", full.names = TRUE)
+
+df_list <- list()
+
+if (length(weather_files) > 0) {
+  for (i in seq_along(weather_files)) {
+    df_list[[i]] <- read_csv(weather_files[i], show_col_types = FALSE) %>%
+      clean_names() %>%
+      mutate(source_file = basename(weather_files[i]))
+  }
+} else {
+  stop("No files found matching the pattern inside the 'data' folder. Check your directory structure.")
+}
+weather_df <- bind_rows(df_list)
+
+print(head(weather_df))
+```
+
+```{r}
+temp_df_agg <- weather_df %>%
+  group_by(date) %>%
+  summarize(
+    tmin_degrees_f  = mean(tmin_degrees_f, na.rm = TRUE),
+    tmean_degrees_f = mean(tmean_degrees_f, na.rm = TRUE),
+    tmax_degrees_f  = mean(tmax_degrees_f, na.rm = TRUE),
+    vpdmin          = mean(vpdmin_h_pa, na.rm = TRUE),
+    vpdmax          = mean(vpdmax_h_pa, na.rm = TRUE)
+  ) %>%
+  mutate(date_common = ymd(date))
+
+bee_df_ready <- bee_df %>%
+  mutate(date_common = mdy(verbatimEventDate)) %>%
+  filter(!is.na(date_common))
+
+final_df <- bee_df_ready %>%
+  left_join(temp_df_agg, by = "date_common") %>%
+  
+  select(-any_of(c("date", "Date", "date_parsed", "verbatimEventDate", 
+                   "day2", "month2", "year2", "startDayofYear", 
+                   "endDayofYear", "source_file"))) %>%
+  
+  rename(date = date_common) %>%
+  
+  rename(
+    temp_min_f       = tmin_degrees_f,
+    temp_mean_f      = tmean_degrees_f,
+    temp_max_f       = tmax_degrees_f,
+    
+    lat              = decimalLatitude,
+    long             = decimalLongitude,
+    gps_uncertainty  = coordinateUncertaintyInMeters,
+    elevation        = verbatimElevation,
+    state            = stateProvince,
+    specimen_id      = specimenId,
+    sample_id        = sampleId,
+    sampling_method  = samplingProtocol
+  )
+
+print(colnames(final_df))
+print(head(final_df))
+```
+
+```{r}
+final_df %>%
+  count(genus, sort = TRUE)
+```
+
+```{r, eval=FALSE}
+seasonality_plot <- final_df %>%
+  mutate(month = lubridate::month(date, label = TRUE)) %>%
+  count(month, native_status) %>%
+  ggplot(aes(x = month, y = n, fill = native_status)) +
+  geom_col() +
+  labs(
+    title = "Data Check 1: Seasonal Distribution of Observations",
+    x = "Month", y = "Count of Records"
+  ) +
+  scale_fill_manual(values = c("Native" = "#00BFC4", "Introduced" = "#F8766D")) +
+  theme_minimal()
+
+print(seasonality_plot)
+```
+
+```{r}
+seasonality_plot <- final_df %>%
+  mutate(month_label = lubridate::month(date, label = TRUE)) %>% 
+  count(month_label) %>%
+  ggplot(aes(x = month_label, y = n)) +
+  
+  geom_col(fill = "gray40") +
+  
+  labs(
+    title = "Seasonal Distribution of Bee Observations",
+    x = "Month", 
+    y = "Total Observations"
+  ) +
+  theme_classic()
+
+print(seasonality_plot)
+```
+
+
+```{r}
+species_list <- final_df %>%
+  mutate(scientific_name = paste(genus, specificEpithet, sep = " ")) %>%
+  distinct(scientific_name) %>%
+  arrange(scientific_name) %>%
+  pull(scientific_name)
+
+print(species_list)
+
+```
+```{r}
+final_df <- final_df %>%
+  mutate(
+    genus = str_squish(genus),
+    specificEpithet = str_squish(specificEpithet),
+    scientific_name = paste(genus, specificEpithet)
+  ) %>%
+  
+  filter(genus != "", specificEpithet != "") %>%
+
+  mutate(
+    native_status = case_when(
+      genus == "Apis" ~ "Introduced",
+      genus == "Anthidium" & specificEpithet == "manicatum" ~ "Introduced",
+      genus == "Megachile" & specificEpithet == "rotundata" ~ "Introduced",
+      genus == "Osmia" & specificEpithet == "cornifrons" ~ "Introduced",
+      genus == "Osmia" & specificEpithet == "caerulescens" ~ "Introduced",
+      genus == "Lasioglossum" & specificEpithet == "zonulus" ~ "Introduced",
+      genus == "Lasioglossum" & specificEpithet == "villosulum" ~ "Introduced",
+      genus == "Xylocopa" & specificEpithet == "virginica" ~ "Introduced", 
+      
+      TRUE ~ "Native"
+    )
+  )
+
+table(final_df$native_status)
+```
+```{r}
+daily_summary <- final_df %>%
+  group_by(date, temp_max_f, native_status) %>%
+  summarize(
+    total_bees = n(),
+    species_count = n_distinct(scientific_name),
+    .groups = "drop"
+  )
+
+normalized_data <- daily_summary %>%
+  group_by(native_status) %>%
+  mutate(
+    max_observed = max(total_bees), 
+    
+    percent_activity = (total_bees / max_observed) * 100
+  ) %>%
+  ungroup()
+
+ggplot(normalized_data, aes(x = temp_max_f, y = percent_activity, color = native_status)) +
+  
+  geom_point(alpha = 0.4, position = "jitter") +
+  
+  geom_smooth(method = "loess", se = FALSE) +
+  
+  coord_cartesian(ylim = c(0, 50)) +
+  
+  labs(
+    title = "Relative Heat Tolerance: Native vs. Introduced Bees",
+    subtitle = "Zoomed View (0-25%): Detailed look at activity decline",
+    x = "Max Daily Temperature (°F)",
+    y = "% of Maximum Activity",
+    color = "Bee Type"
+  ) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  theme_minimal()
+```
+```{r}
+summer_stats_data <- daily_summary %>%
+  mutate(month = month(date)) %>%
+  filter(month >= 5 & month <= 9)
+
+natives_only <- summer_stats_data %>% filter(native_status == "Native")
+introduced_only <- summer_stats_data %>% filter(native_status == "Introduced")
+
+test_native <- cor.test(natives_only$total_bees, 
+                        natives_only$temp_max_f, 
+                        method = "spearman")
+
+test_introduced <- cor.test(introduced_only$total_bees, 
+                            introduced_only$temp_max_f, 
+                            method = "spearman")
+
+print("--- NATIVE BEES RESULTS ---")
+print(test_native)
+
+print("--- INTRODUCED BEES RESULTS ---")
+print(test_introduced)
+```
+
+
+```{r}
+richness_data <- final_df %>%
+  filter(!is.na(temp_max_f)) %>%
+  
+  mutate(temp_category = cut(temp_max_f, 
+                             breaks = c(-Inf, 75, 90, Inf),
+                             labels = c("Cool (<75°F)", "Warm (75-90°F)", "Hot (>90°F)"))) %>%
+  
+  filter(!is.na(temp_category)) %>%
+  
+  group_by(date, temp_category) %>%
+  summarize(daily_richness = n_distinct(scientific_name), .groups = "drop")
+
+ggplot(richness_data, aes(x = temp_category, y = daily_richness, fill = temp_category)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, color = "black") +
+  labs(
+    title = "Biodiversity Loss During Extreme Heat",
+    subtitle = "Daily species richness drops significantly on hot days (>90°F)",
+    x = "Daily Max Temperature",
+    y = "Number of Unique Species Observed"
+  ) +
+  theme_classic() +
+  scale_fill_manual(values = c("Cool (<75°F)" = "#619CFF", 
+                               "Warm (75-90°F)" = "#F8766D", 
+                               "Hot (>90°F)" = "#B22222")) +
+  theme(legend.position = "none")
+```
+
+```{r}
+split_richness_data <- final_df %>%
+  mutate(month = month(date)) %>%
+  filter(month >= 5 & month <= 9) %>%
+  
+  filter(!is.na(temp_max_f)) %>%
+  
+  mutate(temp_category = cut(temp_max_f, 
+                             breaks = c(-Inf, 75, 90, Inf),
+                             labels = c("Cool (<75°F)", "Warm (75-90°F)", "Hot (>90°F)"))) %>%
+  
+  filter(!is.na(temp_category)) %>%
+  
+  group_by(date, temp_category, native_status) %>%
+  summarize(daily_richness = n_distinct(scientific_name), .groups = "drop")
+
+native_richness <- split_richness_data %>% filter(native_status == "Native")
+kw_native <- kruskal.test(daily_richness ~ temp_category, data = native_richness)
+
+introduced_richness <- split_richness_data %>% filter(native_status == "Introduced")
+kw_introduced <- kruskal.test(daily_richness ~ temp_category, data = introduced_richness)
+
+print("--- NATIVE RICHNESS (Kruskal-Wallis) ---")
+print(kw_native)
+
+print("--- INTRODUCED RICHNESS (Kruskal-Wallis) ---")
+print(kw_introduced)
+```
+```{r}
+vpd_plot_data <- final_df %>%
+  mutate(month = month(date)) %>%
+  filter(month >= 5 & month <= 9) %>%
+  
+  group_by(date, vpdmax, native_status) %>%
+  summarize(total_bees = n(), .groups = "drop") %>%
+  
+  filter(!is.na(vpdmax)) %>%
+  
+  group_by(native_status) %>%
+  mutate(
+    max_observed = max(total_bees),
+    percent_activity = (total_bees / max_observed) * 100
+  ) %>%
+  ungroup()
+
+ggplot(vpd_plot_data, aes(x = vpdmax, y = percent_activity, color = native_status)) +
+  
+  geom_point(alpha = 0.4, position = "jitter") +
+  
+  geom_smooth(method = "loess", se = FALSE) +
+  
+  coord_cartesian(ylim = c(0, 50)) +
+  
+  labs(
+    title = "Effect of Air Dryness (VPD) on Bee Activity",
+    subtitle = "Native bees show higher sensitivity to desiccation stress",
+    x = "Max Vapor Pressure Deficit (kPa)\n(Higher = Drier Air)",
+    y = "% of Maximum Activity",
+    color = "Bee Type"
+  ) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  theme_minimal()
+```
+
+```{r}
+native_vpd <- vpd_plot_data %>% filter(native_status == "Native")
+intro_vpd <- vpd_plot_data %>% filter(native_status == "Introduced")
+
+test_native_vpd <- cor.test(native_vpd$total_bees, native_vpd$vpdmax, method = "spearman")
+
+test_intro_vpd <- cor.test(intro_vpd$total_bees, intro_vpd$vpdmax, method = "spearman")
+
+print("--- NATIVE VPD RESULTS ---")
+print(test_native_vpd)
+print("--- INTRODUCED VPD RESULTS ---")
+print(test_intro_vpd)
+```
+```{r}
+summer_df <- final_df %>%
+  mutate(month = month(date)) %>%
+  filter(month >= 5 & month <= 9) %>%
+  filter(!is.na(temp_max_f))
+
+bee_colors <- c("Native" = "#00BFC4", "Introduced" = "#F8766D")
+
+plot1_data <- summer_df %>%
+  group_by(date, temp_max_f, native_status) %>%
+  summarize(total_bees = n(), .groups = "drop")
+
+plot1 <- ggplot(plot1_data, aes(x = temp_max_f, y = total_bees, color = native_status)) +
+  geom_point(alpha = 0.5, position = "jitter") +
+  geom_smooth(method = "loess", se = FALSE, size = 1.5) +
+  facet_wrap(~native_status, scales = "free_y") +
+  labs(
+    title = "Figure 1: Bee Foraging Activity vs. Temperature",
+    subtitle = "Native bees show a sharp activity decline (The 'Thermal Cliff') above 90°F",
+    x = "Max Daily Temperature (°F)",
+    y = "Daily Bee Count",
+    color = "Bee Type"
+  ) +
+  scale_color_manual(values = bee_colors) +
+  theme_bw(base_size = 14) + 
+  theme(legend.position = "none", strip.text = element_text(face = "bold", size = 16))
+
+print(plot1)
+
+
+plot2_data <- summer_df %>%
+  mutate(temp_category = cut(temp_max_f, 
+                             breaks = c(-Inf, 75, 90, Inf),
+                             labels = c("Cool (<75°F)", "Warm (75-90°F)", "Hot (>90°F)"))) %>%
+  filter(!is.na(temp_category)) %>%
+  group_by(date, temp_category, native_status) %>%
+  summarize(daily_richness = n_distinct(scientific_name), .groups = "drop")
+
+plot2 <- ggplot(plot2_data, aes(x = temp_category, y = daily_richness, fill = native_status)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4) +
+  facet_wrap(~native_status, scales = "free_y") +
+  labs(
+    title = "Figure 2: Daily Species Richness by Temperature",
+    subtitle = "Richness remains relatively stable across temperature zones for both groups",
+    x = "Temperature Category",
+    y = "Number of Unique Species Observed"
+  ) +
+  scale_fill_manual(values = bee_colors) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = "none", strip.text = element_text(face = "bold", size = 16))
+
+print(plot2)
+
+
+plot3_data <- summer_df %>%
+  filter(!is.na(vpdmax)) %>%
+  group_by(date, vpdmax, native_status) %>%
+  summarize(total_bees = n(), .groups = "drop")
+
+plot3 <- ggplot(plot3_data, aes(x = vpdmax, y = total_bees, color = native_status)) +
+  geom_point(alpha = 0.5, position = "jitter") +
+  geom_smooth(method = "loess", se = FALSE, size = 1.5) +
+  facet_wrap(~native_status, scales = "free_y") +
+  labs(
+    title = "Figure 3: Impact of Air Dryness (VPD) on Activity",
+    subtitle = "Native activity drops as air becomes drier (Higher VPD)",
+    x = "Max Vapor Pressure Deficit (kPa)",
+    y = "Daily Bee Count",
+    color = "Bee Type"
+  ) +
+  scale_color_manual(values = bee_colors) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = "none", strip.text = element_text(face = "bold", size = 16))
+
+print(plot3)
+```
+```{r}
+print("--- STATS FOR FIGURE 1 (Abundance vs Temp) ---")
+# Test: Spearman Correlation
+p1_native <- plot1_data %>% filter(native_status == "Native")
+p1_intro  <- plot1_data %>% filter(native_status == "Introduced")
+
+res1_native <- cor.test(p1_native$total_bees, p1_native$temp_max_f, method = "spearman")
+res1_intro  <- cor.test(p1_intro$total_bees, p1_intro$temp_max_f, method = "spearman")
+
+print("Native Abundance Correlation:")
+print(res1_native)
+print("Introduced Abundance Correlation:")
+print(res1_intro)
+
+
+print("--- STATS FOR FIGURE 2 (Richness vs Temp Category) ---")
+# Test: Kruskal-Wallis Rank Sum Test
+p2_native <- plot2_data %>% filter(native_status == "Native")
+p2_intro  <- plot2_data %>% filter(native_status == "Introduced")
+
+res2_native <- kruskal.test(daily_richness ~ temp_category, data = p2_native)
+res2_intro  <- kruskal.test(daily_richness ~ temp_category, data = p2_intro)
+
+print("Native Richness K-W Test:")
+print(res2_native)
+print("Introduced Richness K-W Test:")
+print(res2_intro)
+
+
+print("--- STATS FOR FIGURE 3 (Abundance vs VPD) ---")
+# Test: Spearman Correlation
+p3_native <- plot3_data %>% filter(native_status == "Native")
+p3_intro  <- plot3_data %>% filter(native_status == "Introduced")
+
+res3_native <- cor.test(p3_native$total_bees, p3_native$vpdmax, method = "spearman")
+res3_intro  <- cor.test(p3_intro$total_bees, p3_intro$vpdmax, method = "spearman")
+
+print("Native VPD Correlation:")
+print(res3_native)
+print("Introduced VPD Correlation:")
+print(res3_intro)
+```
+## Conclusion
+
+Our analysis of the Oregon Bee Atlas and PRISM climate data reveals a physiological divergence in how native and introduced bees respond to the environmental conditions.
+
+Answering our primary question, we found that native bees are significantly more sensitive to environmental effects than introduced species. Native foraging abundance showed a highly significant correlation with maximum daily temperature ($p < 0.001$). In contrast, introduced species dominated by the European Honey Bee showed no statistical relationship with temperature ($p = 0.65$). This indicates that introduced generalists possess a "thermal resilience" allowing them to exploit resources consistently across a wide range of temperatures.
+
+Unlike our initial predictions of stability, the statistical test revealed that native species richness varies significantly across temperature categories ($p = 0.02$), while introduced richness remains static ($p = 0.58$). This suggests that extreme heat does not just reduce the number of native bees flying, but actively filters the types of native bees present, likely excluding species with narrower thermal windows from the landscape during heat waves.
+
+Our results confirmed the hypothesis that air dryness acts as a limiting factor for native communities. Native abundance was significantly correlated with Vapor Pressure Deficit ($p = 0.003$), while introduced species showed no sensitivity to aridity ($p = 0.60$). This supports the theory that smaller bodied native bees are more susceptible to VPD stress than managed species, putting them at distinct disadvantage as climate change leads to drier summers in the Pacific Northwest.
+
+These findings provide strong evidence that introduced honey bees have a competitive "stability advantage" in a warming climate. Conservation strategies that rely on honey bee data to assess "pollinator health" will mask the stress being experienced by native communities. To prevent the loss of native biodiversity, land managers must prioritize the protection of shade providing wildlife and diverse canopy structures to buffer the effects of extreme heat and aridity on sensitive native populations.
+
+---
+
+## References
